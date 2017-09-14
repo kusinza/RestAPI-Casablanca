@@ -1,0 +1,59 @@
+#include <iostream>
+#include <Windows.h>
+#include "DBConnection.h"
+#include <sql.h>
+#include <sqltypes.h>
+#include <sqlext.h>
+#include<vector>
+#include "traderserver.h"
+
+#pragma comment( lib, "odbc32.lib" )
+
+TraderServer server1,server2,server3,server4;
+
+std::vector<std::thread>Sub_thread;
+std::vector<TraderServer>Servers;
+void putInVector();
+#ifdef _WIN32
+void putInVector() {
+	server1.url= "http://localhost:1235/login";
+	server1.name = "login_server";
+	Servers.push_back(server1);
+	server2.url = "http://localhost:1234/registration";
+	server2.name = "registration_server";
+	Servers.push_back(server2);
+
+	
+	server3.url = "http://localhost:1234/buy";
+	server3.name = "buy_server";
+	Servers.push_back(server3);
+	server4.url = "http://localhost:1234/sell";
+	server4.name = "sell_server";
+	Servers.push_back(server4);
+
+}
+void makeThread() {
+	for (auto serv : Servers) {
+		Sub_thread.push_back(std::thread{ &TraderServer::start,serv });
+
+	}
+}
+int wmain(int argc, wchar_t *argv[])
+#else
+int main(int argc, char *argv[])
+#endif
+{
+
+	
+	std::cout.sync_with_stdio(true);
+	putInVector();
+
+	makeThread();
+
+std::string line;
+	std::getline(std::cin, line);
+
+	return 0;
+}
+
+
